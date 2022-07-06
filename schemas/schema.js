@@ -35,7 +35,6 @@ const Course = {
 
         // Sets the number of scheduled classes available for this course
         reduceQueryResult: (queryResult) => {
-          console.log('Number of classes: Query Result is', queryResult)
           // return queryResult.numScheduled > 0
           return true // only for testing purpose( you can change it on the basis of your program logic)
         },
@@ -60,7 +59,6 @@ const Course = {
           }`,
         reduceQueryResult: (queryResult) => {
           // Sets a preview of the instructors that are currently scheduled to teach this course
-          console.log('Description: Query Result is', queryResult)
 
           if (queryResult.courses && queryResult.courses.length > 0) {
             const instructorSet = queryResult.courses.reduce(
@@ -91,7 +89,7 @@ const Course = {
 
         // Sets the number of scheduled classes available for this course
         reduceQueryResult: (queryResult) => {
-          console.log('Number of classes: Query Result is', queryResult)
+          // console.log('Number of classes: Query Result is', queryResult)
 
           return queryResult.numScheduled
         },
@@ -110,8 +108,6 @@ const Course = {
 
         // Sets the number of scheduled classes available for this course
         reduceQueryResult: (queryResult) => {
-          console.log('Number of courses: Query Result is', queryResult)
-
           // return queryResult.numScheduled
           return 1 // returning 1 for testing
         },
