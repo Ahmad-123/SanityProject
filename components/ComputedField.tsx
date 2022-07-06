@@ -111,6 +111,8 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
         _id,
         ${options.documentQuerySelection}
        }`
+            console.log("Generate Method: setloading")
+
             setLoading(true)
             client.fetch(query).then((items: SanityDocument[]) => {
                 let record = items.find(({ _id }) => _id.includes('drafts'))
@@ -119,19 +121,33 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
                     record = items[0]
                 }
                 const newValue = reducer(record)
+                console.log("Generate Method: new Value is  ", newValue)
+                console.log("Generate Method: Value is  ", value)
+
 
                 if (newValue !== value) {
-                    // let validated = value
-                    // if (type.name === 'number') {
-                    //     validated = parseFloat(value)
-                    //     if (validated === NaN) {
-                    //         validated = undefined
-                    //     }
-                    // }
-                    // // catering boolean values
-                    // if (type.name == 'boolean') {
-                    // }
-                    // props.onChange(PatchEvent.from(validated ? set(validated) : unset()))
+                    let validated = newValue
+
+                    console.log("Generate Method: If condition true for ", newValue)
+
+                    if (type.name === 'number') {
+                        console.log("Generate Method: First If condition true")
+
+                        // validated = parseFloat(value)
+                        validated = value
+                        if (validated === NaN) {
+                            validated = undefined
+                        }
+                    }
+                    // catering boolean values
+                    if (type.name == 'boolean') {
+                        console.log("Generate Method: Second If condition true")
+
+                    }
+                    console.log("Generate Method: No condition true")
+
+
+                    props.onChange(PatchEvent.from(validated ? set(validated) : unset()))
                 }
                 setLoading(false)
             })

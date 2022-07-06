@@ -20,32 +20,16 @@ export default {
         maxLength: 96,
       },
     },
+    // {
+    //   name: 'isGuitar',
+    //   title: 'Add guitar info',
+    //   type: 'boolean',
+    //   initialValue: false,
+    // },
     {
-      name: 'isGuitar',
-      title: 'Add guitar info',
-      type: 'boolean',
-      initialValue: false,
-    },
-    {
-      // name: "computeInput", //Give your sanity field a name
-      // type: "boolean", //"number" or "text" or "string" or "boolean"
-      // inputComponent: ComputedField,
-      // options: {
-      //   editable: true,
-      //   buttonText: "Regenerate",
-      //   documentQuerySelection: `
-      //     _id,
-      //     "numberOfReferences": count(*[references(^._id)])
-      //   `,
-      //   reduceQueryResult: (resultOfQuery) => {
-      //     return resultOfQuery.numberOfReferences
-      //   }
-      // },
 
-      title: 'Is Active',
+      title: 'Is Active (Custom Input)',
       name: 'activeStatus',
-      description:
-        'Whether this course has scheduled items remaining this quarter.',
       type: 'boolean',
       inputComponent: ComputedField,
 
@@ -60,23 +44,25 @@ export default {
       },
     },
     {
-      title: 'Number of classes this quarter',
+      title: 'Number of classes this quarter (Custom Input)',
       name: 'inputtext',
-      description: 'Computed by number of classes on the schedule',
+      description: 'Computed  by number of classes on the schedule',
       type: 'string',
       inputComponent: ComputedField,
       options: {
         editable: true,
-
+        // This is the query to be sent
         documentQuerySelection: `
         "numScheduled": count(*[_type == "scheduledCourse" && references(^._id)])`,
         reduceQueryResult: (queryResult) => {
-          return queryResult.numScheduled
+          console.log("Reached Number of classes this quarter custome input=>", queryResult.numScheduled)
+
+          return queryResult.numScheduledl
         },
       },
     },
     {
-      name: 'numberInput', //Give your sanity field a name
+      name: 'numberInputCustomInput', //Give your sanity field a name
       type: 'number', //"number" or "text" or "string" or "boolean"
       inputComponent: ComputedField,
       options: {
@@ -87,6 +73,7 @@ export default {
           "numberOfReferences": count(*[references(^._id)])
         `,
         reduceQueryResult: (resultOfQuery) => {
+          console.log("Reached number custome input=>", resultOfQuery.numberOfReferences)
           return resultOfQuery.numberOfReferences
         },
       },
