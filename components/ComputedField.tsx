@@ -84,6 +84,7 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
     const [loading, setLoading] = React.useState(false)
     const { _id, _type }: SanityDocument = document
     const options = props.type.options
+    let prevBooleanvalue = value
     validateConfiguration(options)
     const reducer = React.useCallback(
       (queryResult: { [s: string]: unknown }) =>
@@ -92,11 +93,6 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
     )
     const handleChange = React.useCallback(
       (val: any) => {
-        // console.log(
-        //   'Change input is called (call generate function): value is',
-        //   val
-        // )
-
         let validated = val
         if (type.name === 'number') {
           validated = parseFloat(val)
@@ -104,13 +100,17 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
             validated = undefined
           }
         }
+
         // catering boolean values
         if (type.name == 'boolean') {
-          // console.log("Switch Checkbox input value is ", typeof (val))
-          // console.log("Switch Checkbox input value is ", val)
+          if (prevBooleanvalue == false) {
+            validated = true
+          } else {
+            validated = false
+          }
+          prevBooleanvalue = validated
         }
         props.onChange(PatchEvent.from(validated ? set(validated) : unset()))
-        // generate()
       },
       [props.onChange, type.name]
     )
@@ -118,61 +118,9 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
       (e: React.ChangeEvent<HTMLInputElement>) => handleChange(e.target.value),
       [handleChange]
     )
-    const generate = React.useCallback(() => {
-      console.log('Generate Method is called')
-      const query = `*[_type == '${_type}' && _id == '${_id}' || _id == '${_id.replace(
-        'drafts.',
-        ''
-      )}'] {
-        _id,
-        ${options.documentQuerySelection}
-       }`
-      console.log('Generate Method: setloading')
-
-      setLoading(true)
-      client.fetch(query).then((items: SanityDocument[]) => {
-        let record = items.find(({ _id }) => _id.includes('drafts'))
-        if (!record) {
-          // No draft, use the original:
-          record = items[0]
-        }
-        const newValue = reducer(record)
-        console.log('Generate Method: new Value is  ', newValue)
-        console.log('Generate Method: Value is  ', value)
-
-        if (newValue !== value) {
-          let validated = newValue
-
-          console.log('Generate Method: If condition true for ', newValue)
-
-          if (type.name === 'number') {
-            console.log('Generate Method: First If condition true')
-
-            // validated = parseFloat(value)
-            validated = value
-            if (validated === NaN) {
-              validated = undefined
-            }
-          }
-          // catering boolean values
-          if (type.name == 'boolean') {
-            console.log('Generate Method: Second If condition true')
-          }
-          console.log('Generate Method: No condition true')
-
-          props.onChange(PatchEvent.from(validated ? set(validated) : unset()))
-        }
-        setLoading(false)
-      })
-    }, [reducer, value, _id, _type])
     let TextComponent = type.name === 'text' ? TextArea : TextInput
 
     React.useEffect(() => {
-      console.log(
-        'Use effect is  called: I run everytime this component rerenders'
-      )
-      // generate()
-      console.log('Generate Method is called')
       const query = `*[_type == '${_type}' && _id == '${_id}' || _id == '${_id.replace(
         'drafts.',
         ''
@@ -180,7 +128,6 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
         _id,
         ${options.documentQuerySelection}
        }`
-      // console.log('Generate Method: setloading')
 
       setLoading(true)
       client.fetch(query).then((items: SanityDocument[]) => {
@@ -190,18 +137,11 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
           record = items[0]
         }
         const newValue = reducer(record)
-        console.log('Generate Method: new Value is  ', newValue)
-        console.log('Generate Method: Value is  ', value)
 
         if (newValue !== value) {
           let validated = newValue
 
-          console.log('Generate Method: If condition true for ', newValue)
-
           if (type.name === 'number') {
-            console.log('input type is number')
-
-            // validated = parseFloat(value)
             validated = newValue
 
             if (validated === NaN) {
@@ -210,19 +150,16 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
           }
           // catering boolean values
           if (type.name == 'boolean') {
-            console.log('input type is boolean', newValue)
+            prevBooleanvalue = newValue
           }
           if (type.name == 'string') {
-            console.log('input type is string')
             validated = String(newValue)
           }
-          console.log('input type is text')
 
           props.onChange(PatchEvent.from(validated ? set(validated) : unset()))
         }
         setLoading(false)
       })
-      console.log('Use effect ends')
     }, [])
 
     return (
@@ -236,15 +173,17 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
             markers={props.markers}
           >
             {type.name === 'boolean' ? (
-              // <Switch
-              //     checked={value}
-              //     // value={checkedStatus}
-              //     disabled={!options.editable}
-              //     ref={forwardedRef}
-              //     onChange={options.editable ? onChange : null}
-              // />
-              <Switch onChange={options.editable ? generate : null} />
+              <Switch
+                checked={value}
+                // value={checkedStatus}
+                disabled={!options.editable}
+                onChange={options.editable ? onChange : null}
+              />
             ) : (
+              // <Switch
+              //   checked={value}
+              //   onChange={options.editable ? onChange : null}
+              // />
               <TextComponent
                 disabled={!options.editable}
                 type={type.name === 'number' ? 'number' : 'text'}
@@ -256,20 +195,6 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
               />
             )}
           </DefaultFormField>
-          {/* <Flex align="center">
-                        <Button
-                            mode="ghost"
-                            type="button"
-                            onClick={generate}
-                            onFocus={onFocus}
-                            text={options.buttonText || 'Regenerate'}
-                        />
-                        {loading && (
-                            <Box paddingLeft={2}>
-                                <Spinner muted />
-                            </Box>
-                        )}
-                    </Flex> */}
         </Stack>
       </ThemeProvider>
     )
